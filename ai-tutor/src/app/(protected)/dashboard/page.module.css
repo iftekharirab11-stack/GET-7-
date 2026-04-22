@@ -1,0 +1,121 @@
+.page {
+  min-height: calc(100vh - 4rem);
+  padding: 3rem 1.5rem;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.actionCard {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  transition: border-color 0.2s ease;
+}
+
+.actionCard:hover {
+  border-color: var(--primary);
+}
+
+.actionCard h3 {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.actionCard p {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.sessions {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.session {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.sessionType {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.sessionTopic {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.sessionMeta {
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.score {
+  color: var(--primary);
+  font-weight: 600;
+}
