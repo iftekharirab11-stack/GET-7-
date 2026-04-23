@@ -1,40 +1,44 @@
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
-const SYSTEM_PROMPT = `You are an expert writing tutor. Analyze the user's essay and provide detailed feedback on:
-1. Grammar and punctuation errors
-2. Vocabulary and word choice suggestions
-3. Sentence structure and flow improvements
-4. Overall organization and coherence
-5. Specific strengths
+const SYSTEM_PROMPT = `You are an IELTS examiner. Score the writing strictly on IELTS criteria (Band 0-9).
+Evaluate:
+- Grammar (25%)
+- Vocabulary (25%)
+- Coherence & Cohesion (25%)
+- Task Achievement (25%)
 
-Provide your feedback in a clear, structured format. End with an overall score out of 100.`;
+Return JSON only, no other text:
+{
+  "score": <number 0-9>,
+  "grammar_feedback": "<2-3 sentences on grammar issues>",
+  "vocabulary_feedback": "<2-3 sentences on vocabulary usage>",
+  "improved_version": "<improved essay in 2-3 paragraphs>"
+}`;
 
 export const runtime = "edge";
 
 export async function POST(request: Request): Promise<Response> {
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
   try {
     const body = await request.json();
     const { essay, topic } = body;
 
     if (!essay || essay.trim().length < 10) {
       return new Response(
-        encoder.encode(`data: ${JSON.stringify({ error: "Please write at least 10 characters" })}\n\n`),
-        { status: 400, headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } }
+        JSON.stringify({ error: "Please write at least 10 characters" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: topic
-          ? `Topic: ${topic}\n\nEssay:\n${essay}`
-          : `Essay:\n${essay}`,
-      },
-    ];
+    if (!OPENAI_API_KEY) {
+      return new Response(
+        JSON.stringify({ error: "OpenAI API key not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const userContent = topic
+      ? `Topic: ${topic}\n\nEssay to evaluate:\n${essay}`
+      : `Essay to evaluate:\n${essay}`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -43,80 +47,48 @@ export async function POST(request: Request): Promise<Response> {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages,
-        temperature: 0.7,
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userContent },
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.3,
         max_tokens: 2048,
-        stream: true,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       return new Response(
-        encoder.encode(`data: ${JSON.stringify({ error: errorText || `API error: ${response.status}` })}\n\n`),
-        { status: response.status, headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } }
+        JSON.stringify({ error: errorText || `API error: ${response.status}` }),
+        { status: response.status, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const stream = new ReadableStream({
-      start(controller) {
-        const reader = response.body?.getReader();
-        if (!reader) {
-          controller.close();
-          return;
-        }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "{}";
 
-        let buffer = "";
-        const processChunk = () => {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-              controller.close();
-              return;
-            }
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      parsed = {
+        score: 5,
+        grammar_feedback: "Could not parse response",
+        vocabulary_feedback: content.substring(0, 200),
+        improved_version: essay,
+      };
+    }
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") continue;
-
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices?.[0]?.delta?.content || "";
-                  if (content) {
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                  }
-                } catch {
-                  // Skip invalid JSON
-                }
-              }
-            }
-
-            processChunk();
-          });
-        };
-
-        processChunk();
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
+    return new Response(JSON.stringify(parsed), {
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return new Response(
-      encoder.encode(`data: ${JSON.stringify({ error: errorMessage })}\n\n`),
-      { status: 500, headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" } }
+      JSON.stringify({ error: errorMessage }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }

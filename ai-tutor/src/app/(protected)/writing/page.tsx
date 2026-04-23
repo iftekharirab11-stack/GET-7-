@@ -1,7 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
+
+interface WritingFeedback {
+  score: number;
+  grammar_feedback: string;
+  vocabulary_feedback: string;
+  improved_version: string;
+}
 
 const TOPICS = [
   "Describe your favorite place",
@@ -16,24 +24,50 @@ export default function Writing() {
   const [topic, setTopic] = useState(TOPICS[0]);
   const [customTopic, setCustomTopic] = useState("");
   const [essay, setEssay] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [streamingFeedback, setStreamingFeedback] = useState("");
+  const [result, setResult] = useState<WritingFeedback | null>(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState<number | null>(null);
-  const feedbackEndRef = useRef<HTMLDivElement>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    feedbackEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [streamingFeedback, feedback]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUserId(session.user.id);
+      }
+    });
+  }, []);
+
+  const saveProgress = async (finalResult: WritingFeedback) => {
+    if (!userId) {
+      console.log("User not logged in, skipping progress save");
+      return;
+    }
+
+    const combinedFeedback = `Grammar: ${finalResult.grammar_feedback} | Vocabulary: ${finalResult.vocabulary_feedback}`;
+
+    const { error } = await supabase.from('progress').insert({
+      user_id: userId,
+      activity_type: 'writing',
+      score: finalResult.score,
+      feedback: combinedFeedback,
+      metadata: {
+        topic: topic === "Custom topic..." ? customTopic : topic,
+        improved_version: finalResult.improved_version
+      }
+    });
+
+    if (error) {
+      console.error('Failed to save progress:', error);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!essay.trim() || loading) return;
 
     const finalTopic = topic === "Custom topic..." ? customTopic : topic;
-    setFeedback("");
-    setStreamingFeedback("");
-    setScore(null);
+    setResult(null);
+    setError("");
     setLoading(true);
 
     try {
@@ -47,67 +81,35 @@ export default function Writing() {
         throw new Error(`HTTP error: ${response.status}`);
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response stream");
+      const data = await response.json();
 
-      const decoder = new TextDecoder();
-      let fullFeedback = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((line) => line.startsWith("data: "));
-
-        for (const line of lines) {
-          const data = line.slice(6);
-          if (data === "[DONE]") continue;
-
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.content) {
-              fullFeedback += parsed.content;
-              setStreamingFeedback(fullFeedback);
-            }
-          } catch {
-            // Skip invalid JSON
-          }
-        }
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      // Extract score from feedback
-      const scoreMatch = fullFeedback.match(/(\d{1,3})\s*\/\s*100/i);
-      if (scoreMatch) {
-        setScore(parseInt(scoreMatch[1]));
-      }
-
-      setFeedback(fullFeedback);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      setFeedback(`Error: ${errorMessage}`);
+      setResult(data);
+      await saveProgress(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An error occurred";
+      setError(message);
     } finally {
       setLoading(false);
-      setStreamingFeedback("");
     }
   };
 
   const handleClear = () => {
     setEssay("");
-    setFeedback("");
-    setScore(null);
-    setStreamingFeedback("");
+    setResult(null);
+    setError("");
   };
-
-  
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Writing Practice</h1>
+          <h1 className={styles.title}>IELTS Writing Practice</h1>
           <p className={styles.subtitle}>
-            Write an essay and get AI-powered feedback
+            Write an essay and get AI-powered IELTS feedback
           </p>
         </div>
 
@@ -122,9 +124,7 @@ export default function Writing() {
                 className={styles.topicSelect}
               >
                 {TOPICS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
+                  <option key={t} value={t}>{t}</option>
                 ))}
               </select>
               {topic === "Custom topic..." && (
@@ -139,7 +139,7 @@ export default function Writing() {
             </div>
             <textarea
               className={styles.textarea}
-              placeholder="Start writing your essay here..."
+              placeholder="Write your essay here (250+ words for best results)..."
               value={essay}
               onChange={(e) => setEssay(e.target.value)}
               disabled={loading}
@@ -166,50 +166,48 @@ export default function Writing() {
 
           <div className={styles.feedback}>
             <h3>AI Feedback</h3>
-            {loading ? (
+            {loading && (
               <div className={styles.loadingFeedback}>
                 <span className={styles.spinner}></span>
                 <span>Analyzing your essay...</span>
               </div>
-            ) : feedback ? (
+            )}
+            {error && (
+              <div className={styles.errorFeedback}>
+                <p>Error: {error}</p>
+              </div>
+            )}
+            {result && (
               <>
-                <div className={styles.feedbackContent}>
-                  {feedback.split("\n").map((line, i) => {
-                    if (line.match(/^\d{1,3}\s*\/\s*100/i)) {
-                      return null;
-                    }
-                    return (
-                      <p key={i} className={line.startsWith("- ") || line.match(/^[\d•]/) ? styles.listItem : ""}>
-                        {line}
-                      </p>
-                    );
-                  })}
+                <div className={styles.score}>
+                  <span>IELTS Band Score</span>
+                  <strong>{result.score}</strong>
                 </div>
-                {score !== null && (
-                  <div className={styles.score}>
-                    <span>Overall Score</span>
-                    <strong>{score}/100</strong>
-                  </div>
-                )}
+                <div className={styles.feedbackSection}>
+                  <h4>Grammar & Mechanics</h4>
+                  <p>{result.grammar_feedback}</p>
+                </div>
+                <div className={styles.feedbackSection}>
+                  <h4>Vocabulary</h4>
+                  <p>{result.vocabulary_feedback}</p>
+                </div>
+                <div className={styles.feedbackSection}>
+                  <h4>Improved Version</h4>
+                  <pre className={styles.improvedText}>{result.improved_version}</pre>
+                </div>
               </>
-            ) : (
+            )}
+            {!result && !loading && !error && (
               <div className={styles.emptyFeedback}>
-                <p>Submit your essay to receive AI feedback.</p>
+                <p>Submit your essay to receive IELTS feedback.</p>
                 <ul>
-                  <li>Grammar and punctuation review</li>
+                  <li>IELTS Band Score (0-9)</li>
+                  <li>Grammar feedback</li>
                   <li>Vocabulary suggestions</li>
-                  <li>Structure and flow improvements</li>
-                  <li>Overall score</li>
+                  <li>Improved version</li>
                 </ul>
               </div>
             )}
-            {streamingFeedback && (
-              <div className={styles.feedbackContent}>
-                {streamingFeedback}
-                <span className={styles.cursor}>▊</span>
-              </div>
-            )}
-            <div ref={feedbackEndRef} />
           </div>
         </form>
       </div>
