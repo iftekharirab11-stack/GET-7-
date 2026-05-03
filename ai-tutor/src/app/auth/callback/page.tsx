@@ -6,25 +6,6 @@ import { supabase } from "@/lib/supabaseClient";
 
 export const dynamic = "force-dynamic";
 
-async function ensureProfile(userId: string, userEmail: string | undefined) {
-  if (!userId) return;
-
-  // Check if profile exists
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('id', userId)
-    .single();
-
-  // Create profile if doesn't exist
-  if (!existing) {
-    await supabase.from('profiles').insert({
-      id: userId,
-      email: userEmail || ''
-    });
-  }
-}
-
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,9 +17,6 @@ function CallbackContent() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (session) {
-        // Ensure profile exists
-        await ensureProfile(session.user.id, session.user.email);
-
         router.push(redirect);
       } else {
         router.push("/login");

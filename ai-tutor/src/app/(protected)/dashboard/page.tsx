@@ -20,21 +20,6 @@ export default function Dashboard() {
   const [recentProgress, setRecentProgress] = useState<ProgressRecord[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
-  async function ensureProfile(userId: string, userEmail: string | undefined) {
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', userId)
-      .single();
-
-    if (!existing) {
-      await supabase.from('profiles').insert({
-        id: userId,
-        email: userEmail || ''
-      });
-    }
-  }
-
   useEffect(() => {
     async function loadDashboardData() {
       const userId = await getCurrentUserId();
@@ -47,7 +32,6 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setUser({ id: userId, email: session.user.email });
-        await ensureProfile(userId, session.user.email);
       }
 
       const [progress, userStats] = await Promise.all([
