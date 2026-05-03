@@ -5,13 +5,13 @@ export default function Speaking() {
     <div className={styles.page}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Speaking Practice</h1>
-          <p className={styles.subtitle}>Practice pronunciation and speaking skills with AI</p>
+          <h1 className={styles.title}>SPEAKING PRACTICE</h1>
+          <p className={styles.subtitle}>IELTS Speaking Mastery Interface</p>
         </div>
 
         <div className={styles.content}>
           <div className={styles.prompt}>
-            <h3>Speaking Prompt</h3>
+            <h3>SPEAKING PROMPT // IELTS PART 2</h3>
             <p>Describe your favorite travel destination and why you would recommend it to others.</p>
           </div>
 
@@ -25,12 +25,17 @@ export default function Speaking() {
                   <line x1="8" y1="23" x2="16" y2="23"/>
                 </svg>
               </button>
-              <p>Click to start recording</p>
+              <p>CLICK TO INITIATE RECORDING</p>
+              <div className={styles.waveform}>
+                {[...Array(10)].map((_, i) => (
+                  <div key={i} className={styles.waveBar} style={{ height: `${20 + Math.random() * 80}%` }}></div>
+                ))}
+              </div>
             </div>
           </div>
 
           <div className={styles.feedback}>
-            <h3>Analysis</h3>
+            <h3>ANALYSIS // NEURAL FEEDBACK</h3>
             <div className={styles.metrics}>
               <div className={styles.metric}>
                 <span>Pronunciation</span>
@@ -50,7 +55,7 @@ export default function Speaking() {
               </div>
             </div>
             <div className={styles.suggestions}>
-              <h4>Tips for Improvement</h4>
+              <h4>AI RECOMMENDATIONS</h4>
               <ul>
                 <li>Work on linking words more smoothly</li>
                 <li>Try to reduce pauses between sentences</li>
@@ -60,8 +65,8 @@ export default function Speaking() {
         </div>
 
         <div className={styles.actions}>
-          <button className="btn btn-secondary">Try Again</button>
-          <button className="btn btn-primary">Next Prompt</button>
+          <button className="btn btn-secondary">TRY AGAIN</button>
+          <button className="btn btn-primary">NEXT PROMPT</button>
         </div>
       </div>
     </div>

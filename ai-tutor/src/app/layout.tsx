@@ -16,8 +16,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "AI Tutor - Your Personal AI Learning Assistant",
-  description: "AI-powered tutoring for writing and speaking practice",
+  title: "AI Tutor - Nexus Study Abroad",
+  description: "AI-powered IELTS tutoring for ambitious students targeting prestigious universities",
 };
 
 export default function RootLayout({
@@ -27,10 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-mono bg-background text-foreground`}>
         <Providers>
           <Navigation />
-          <main className="ml-60 min-h-screen">
+          <main className="ml-60 min-h-screen bg-background">
             {children}
           </main>
         </Providers>

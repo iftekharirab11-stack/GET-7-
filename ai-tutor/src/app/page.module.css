@@ -1,6 +1,7 @@
 .page {
   min-height: calc(100vh - 4rem);
   padding: 4rem 1.5rem;
+  background: linear-gradient(180deg, #0A0C10 0%, #0D1117 100%);
 }
 
 .hero {
@@ -15,16 +16,23 @@
   font-weight: 800;
   line-height: 1.1;
   margin-bottom: 1.5rem;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
 .highlight {
-  color: var(--primary);
+  color: var(--accent-cyan);
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
 }
 
 .subtitle {
   font-size: 1.25rem;
   color: var(--muted);
   margin-bottom: 2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .actions {
@@ -44,9 +52,14 @@
 .features h3 {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground);
 }
 
 .features p {
   color: var(--muted);
   font-size: 0.875rem;
+  font-family: 'IBM Plex Mono', monospace;
 }

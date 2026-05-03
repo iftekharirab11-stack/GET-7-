@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem 1.5rem;
+  background: linear-gradient(180deg, #0A0C10 0%, #0D1117 100%);
 }
 
 .container {
@@ -12,10 +13,25 @@
 }
 
 .card {
-  background: var(--surface);
+  background: rgba(22, 27, 34, 0.8);
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 2rem;
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .title {
@@ -23,6 +39,10 @@
   font-weight: 700;
   margin-bottom: 0.5rem;
   text-align: center;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent-cyan);
 }
 
 .subtitle {
@@ -30,6 +50,9 @@
   font-size: 0.875rem;
   margin-bottom: 2rem;
   text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .form {
@@ -47,16 +70,23 @@
 .field label {
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground);
 }
 
 .error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: rgba(255, 59, 59, 0.1);
+  border: 1px solid var(--danger);
+  color: var(--danger);
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
   margin-bottom: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .footerText {
@@ -64,11 +94,14 @@
   text-align: center;
   font-size: 0.875rem;
   color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .footerText a,
 .footerText button {
-  color: var(--primary);
+  color: var(--accent-cyan);
   font-weight: 500;
   background: none;
   border: none;

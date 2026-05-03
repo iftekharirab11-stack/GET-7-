@@ -6,35 +6,34 @@ export default function Home() {
     <div className={styles.page}>
       <div className={styles.hero}>
         <h1 className={styles.title}>
-          Master Your Skills with
-          <span className={styles.highlight}> AI Tutor</span>
+          NEXUS STUDY ABROAD
+          <span className={styles.highlight}>{" // AI IELTS TUTOR"}</span>
         </h1>
         <p className={styles.subtitle}>
-          Your personal AI-powered learning assistant for writing and speaking practice.
-          Get instant feedback and improve your skills.
+          PREMIUM AI-POWERED PREPARATION FOR PRESTIGIOUS UNIVERSITY ADMISSIONS
         </p>
         <div className={styles.actions}>
           <Link href="/dashboard" className="btn btn-primary">
-            Get Started
+            Initialize Mission
           </Link>
           <Link href="/login" className="btn btn-secondary">
-            Sign In
+            Access Terminal
           </Link>
         </div>
       </div>
 
       <div className={styles.features}>
         <div className="card">
-          <h3>AI Chat</h3>
-          <p>Interactive conversations with our AI tutor for personalized learning.</p>
+          <h3>AI CHAT</h3>
+          <p>Real-time conversational practice with neural language processing for IELTS excellence.</p>
         </div>
         <div className="card">
-          <h3>Writing Practice</h3>
-          <p>Get feedback on your writing and improve your composition skills.</p>
+          <h3>WRITING PRACTICE</h3>
+          <p>Advanced analysis and feedback with glitch-decoding AI commentary on your essays.</p>
         </div>
         <div className="card">
-          <h3>Speaking Practice</h3>
-          <p>Practice speaking and get AI-powered feedback on your pronunciation.</p>
+          <h3>SPEAKING PRACTICE</h3>
+          <p>Fluid geometric waveform visualization for pronunciation mastery.</p>
         </div>
       </div>
     </div>
