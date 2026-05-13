@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0c10;
+  --foreground: #e6e6e6;
+  --muted: #7a8c99;
+  --border: #2a2f36;
+  --primary: #00f2fe;
+  --primary-hover: #00d1e0;
+  --surface: #161b22;
+  --surface-elevated: #1c2128;
+  --accent-cyan: #00f2fe;
+  --accent-purple: #bd00ff;
+  --accent-red: #c8102e;
+  --success: #00ff9d;
+  --warning: #ffb800;
+  --danger: #ff3b3b;
+}
+
+@layer base {
+  body {
+    @apply antialiased bg-background text-foreground;
+    background-image: radial-gradient(
+      circle at 50% 0%,
+      rgba(0, 242, 254, 0.03) 0%,
+      transparent 50%
+    );
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium text-sm cursor-pointer transition-all duration-200 border-none font-mono uppercase tracking-wider;
+  }
+  .btn-primary {
+    @apply bg-[var(--accent-cyan)] text-black hover:shadow-[0_0_20px_rgba(0,242,254,0.5)];
+  }
+  .btn-secondary {
+    @apply bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--surface-elevated)] hover:shadow-[0_0_15px_rgba(189,0,255,0.3)];
+  }
+  .card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(22, 27, 34, 0.8);
+    backdrop-filter: blur(10px);
+    @apply border border-[var(--border)] rounded-xl p-6 shadow-lg;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 0.75rem;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      var(--accent-cyan),
+      var(--accent-purple)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .input {
+    @apply w-full px-4 py-3 border border-[var(--border)] rounded-lg text-sm outline-none transition-all duration-200 text-foreground font-mono;
+    background: rgba(22, 27, 34, 0.5);
+    backdrop-filter: blur(10px);
+  }
+  .input:focus {
+    @apply border-[var(--accent-cyan)] shadow-[0_0_10px_rgba(0,242,254,0.3)];
+  }
+}
+
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.animate-wave {
+  animation: wave 0.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.shadow-neon-cyan {
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+}
+.shadow-neon-purple {
+  box-shadow: 0 0 15px rgba(189, 0, 255, 0.5);
+}
+.shadow-neon-red {
+  box-shadow: 0 0 15px rgba(200, 16, 46, 0.5);
+}
